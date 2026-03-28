@@ -15,7 +15,7 @@ from maascommon.enums.package_repositories import (
     PACKAGE_REPO_PORTS_ARCHES,
 )
 from maasservicelayer.exceptions.catalog import ValidationException
-from maasservicelayer.models.fields import GpgKey, PackageRepoUrl
+from maasservicelayer.models.fields import PackageRepoUrl
 
 VALID_GPG_KEY = """\
 -----BEGIN PGP PUBLIC KEY BLOCK-----
