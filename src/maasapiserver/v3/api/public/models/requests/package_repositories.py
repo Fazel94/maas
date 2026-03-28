@@ -17,13 +17,14 @@ from maasservicelayer.builders.package_repositories import (
     PackageRepositoryBuilder,
 )
 from maasservicelayer.exceptions.catalog import ValidationException
-from maasservicelayer.models.fields import PackageRepoUrl
+from maasservicelayer.models.fields import GpgKey, PackageRepoUrl
 
 
 class PackageRepositoryCreateRequest(BaseModel):
     name: str = Field(description="The name of the package repository.")
-    key: str | None = Field(
-        description="The authentication key to use with the repository.",
+    key: GpgKey | None = Field(
+        description="The authentication key to use with the repository. "
+        "Must be an ASCII-armored PGP public key block, or empty.",
         default="",
     )
     url: PackageRepoUrl = Field(

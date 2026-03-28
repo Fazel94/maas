@@ -13,7 +13,7 @@ from maascommon.enums.package_repositories import (
     PocketsToDisableEnum,
 )
 from maasservicelayer.models.base import ResourceBuilder, UNSET, Unset
-from maasservicelayer.models.fields import PackageRepoUrl
+from maasservicelayer.models.fields import GpgKey, PackageRepoUrl
 
 
 class PackageRepositoryBuilder(ResourceBuilder):
@@ -42,7 +42,7 @@ class PackageRepositoryBuilder(ResourceBuilder):
         default=UNSET, required=False
     )
     enabled: Union[bool, Unset] = Field(default=UNSET, required=False)
-    key: Union[str, Unset] = Field(default=UNSET, required=False)
+    key: Union[GpgKey, Unset] = Field(default=UNSET, required=False)
     name: Union[str, Unset] = Field(default=UNSET, required=False)
     updated: Union[datetime, Unset] = Field(default=UNSET, required=False)
     url: Union[PackageRepoUrl, Unset] = Field(default=UNSET, required=False)

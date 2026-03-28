@@ -11,13 +11,13 @@ from maasservicelayer.models.base import (
     generate_builder,
     MaasTimestampedBaseModel,
 )
-from maasservicelayer.models.fields import PackageRepoUrl
+from maasservicelayer.models.fields import GpgKey, PackageRepoUrl
 
 
 @generate_builder()
 class PackageRepository(MaasTimestampedBaseModel):
     name: str
-    key: str
+    key: GpgKey
     url: PackageRepoUrl
     distributions: list[str]
     components: set[KnownComponentsEnum]
