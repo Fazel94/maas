@@ -15,7 +15,15 @@ from maascommon.enums.package_repositories import (
     PACKAGE_REPO_PORTS_ARCHES,
 )
 from maasservicelayer.exceptions.catalog import ValidationException
-from maasservicelayer.models.fields import PackageRepoUrl
+from maasservicelayer.models.fields import GpgKey, PackageRepoUrl
+
+VALID_GPG_KEY = """\
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Version: SKS 1.1.5
+
+mQINBFXVlyMBEACqM3iz2EGJE0iE3/AAbNCnbBB25m3AWaSxJk+GJfkAAYWGqAKiuWceCcet
+=QeWQ
+-----END PGP PUBLIC KEY BLOCK-----"""
 
 
 class TestPackageRepositoryCreateRequest:
@@ -74,6 +82,43 @@ class TestPackageRepositoryCreateRequest:
         else:
             PackageRepositoryCreateRequest(
                 name="name", url=url, disable_sources=True
+            )
+
+    def test_empty_key_is_accepted(self):
+        r = PackageRepositoryCreateRequest(
+            name="name",
+            url=PackageRepoUrl("ppa:foo/bar"),
+            disable_sources=True,
+            key="",
+        )
+        assert r.key == ""
+
+    def test_valid_gpg_key_is_accepted(self):
+        r = PackageRepositoryCreateRequest(
+            name="name",
+            url=PackageRepoUrl("ppa:foo/bar"),
+            disable_sources=True,
+            key=VALID_GPG_KEY,
+        )
+        assert r.key == VALID_GPG_KEY
+
+    @pytest.mark.parametrize(
+        "invalid_key",
+        [
+            "whatever",
+            "not-a-gpg-key",
+            "BEGIN PGP PUBLIC KEY BLOCK",
+        ],
+    )
+    def test_invalid_gpg_key_raises_validation_error(
+        self, invalid_key: str
+    ) -> None:
+        with pytest.raises(ValidationError):
+            PackageRepositoryCreateRequest(
+                name="name",
+                url=PackageRepoUrl("ppa:foo/bar"),
+                disable_sources=True,
+                key=invalid_key,
             )
 
 

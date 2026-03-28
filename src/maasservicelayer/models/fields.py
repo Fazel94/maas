@@ -9,6 +9,16 @@ from pydantic.networks import NetworkType
 
 from maascommon.fields import MAC_FIELD_RE, normalise_macaddress
 
+# Matches an ASCII-armored PGP public key block (RFC 4880).
+# The key may optionally include header lines (e.g. "Version: ...") between
+# the armor header and the base64-encoded body.
+_GPG_ARMOR_RE = re.compile(
+    r"-----BEGIN PGP PUBLIC KEY BLOCK-----"
+    r".*?"  # optional headers
+    r"-----END PGP PUBLIC KEY BLOCK-----",
+    re.DOTALL,
+)
+
 
 class IPv4v6Network(_BaseNetwork):
     """Re-implementation of pydantic's IPvAnyNetwork.
@@ -94,4 +104,32 @@ class PackageRepoUrl(str):
         match = re.fullmatch(cls.COMBINED_RE, value)
         if match is None:
             raise ValueError("Value is not a valid PPA URL.")
+        return value
+
+
+class GpgKey(str):
+    """A GPG public key in ASCII-armored format.
+
+    An empty string is accepted (meaning no key is configured).
+    A non-empty value must contain a valid PGP public key block
+    delimited by the standard ASCII armor headers.
+    """
+
+    def __new__(cls, content):
+        content = cls.validate(content)
+        return str.__new__(cls, content)
+
+    @classmethod
+    def __get_validators__(cls):
+        yield cls.validate
+
+    @classmethod
+    def validate(cls, value: str) -> str:
+        if value == "" or value is None:
+            return value or ""
+        if not _GPG_ARMOR_RE.search(value):
+            raise ValueError(
+                "Value is not a valid GPG public key. "
+                "Expected an ASCII-armored PGP public key block."
+            )
         return value
